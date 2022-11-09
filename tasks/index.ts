@@ -192,15 +192,12 @@ task("stake", "Stake miner")
     const signers = await ethers.getSigners();
     console.log(signers[0].address, (await signers[0].getBalance()).toString());
     const amount = args.amount ?? "100";
-    console.log("1111111");
     const { stakeManger, prison } = await getContract(ethers);
-    console.log("2222222");
     const tx = await stakeManger
       .connect(signers[0])
       .stake(args.address, signers[0].address, {
         value: ethers.utils.parseEther(amount),
       });
-    console.log("333333");
     const x = await tx.wait();
     console.log("stake successfully in block: ", x.blockNumber);
   });
@@ -259,3 +256,17 @@ task("lowblock", "Get low block")
       );
     }
   });
+
+task("stakeAll", "Stake all").setAction(async function (args, { ethers }) {
+  const signers = await ethers.getSigners();
+  const { stakeManger, prison } = await getContract(ethers);
+  for (let i = 2; i < signers.length; i++) {
+    const tx = await stakeManger
+      .connect(signers[0])
+      .stake(signers[i].address, signers[0].address, {
+        value: ethers.utils.parseEther("1000000"),
+      });
+    const x = await tx.wait();
+    console.log("stake successfully in block: ", x.blockNumber);
+  }
+});
